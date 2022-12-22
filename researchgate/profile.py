@@ -46,22 +46,40 @@ def __get_aprofile(self, pages: tuple):
     children = info.findChildren('li', recursive=False)
     info = [child.text for child in children]
 
-    introduction = soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-m nova-legacy-e-text--family-sans-serif nova-legacy-e-text--spacing-none nova-legacy-e-text--color-grey-900']}).text
+    # Параметров ниже может не быть
 
-    disciplines = soup.find('ul', {'class': ['nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-none']})
-    children = disciplines.findChildren('li', recursive=False)
-    disciplines = [child.text for child in children]
+    try:
+        introduction = soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-m nova-legacy-e-text--family-sans-serif nova-legacy-e-text--spacing-none nova-legacy-e-text--color-grey-900']}).text
+    except AttributeError:
+        introduction = ''
 
-    skills = soup.find('ul', {'class': ['nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-none']})
-    children = skills.findChildren('li', recursive=False)
-    kills = [child.text for child in children]
+    try:
+        disciplines = soup.find('ul', {'class': ['nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-none']})
+        children = disciplines.findChildren('li', recursive=False)
+        disciplines = [child.text for child in children]
+    except AttributeError:
+        disciplines = []
 
-    activity = soup.find('ul', {'class': ['nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-xxs']})
-    children = activity.findChildren('li', recursive=False)
-    activity = [child.text for child in children]
+    try:
+        skills = soup.find('ul', {'class': ['nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-none']})
+        children = skills.findChildren('li', recursive=False)
+        skills = [child.text for child in children]
+    except AttributeError:
+        skills = []
+
+    try:
+        activity = soup.find('ul', {'class': ['nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-xxs']})
+        children = activity.findChildren('li', recursive=False)
+        activity = [child.text for child in children]
+    except AttributeError:
+        activity = []
+
+    # Research (Статьи)
+    # __get_research(self, pages[0])
 
 
-    print(name)
+    # Stat (статистика)
+    __get_stat(self, pages[1])
 
 
 
@@ -69,5 +87,53 @@ def __get_unaprofile(self):
     pass
 
 
-def __get_research(self):
+def __get_research(self, add_to_url):
+    pass
+
+
+def __get_stat(self, add_to_url):
+    self._driver.get(f'{self._driver.current_url}{add_to_url}')
+    if self._research_gate_page_404():
+        raise PageNotFoundException(self._driver.current_url)
+
+    source_data = self._driver.page_source
+    soup = bs4(source_data, "html.parser")
+
+    # research_interest_score, reads, citations, recommendations = [], [], [], []     # сделать ссылками, если можно
+    # h_index, h_index_excl = [], []
+    # stat = [research_interest_score, reads, citations, recommendations,
+    #         h_index, h_index_excl]
+
+    stat = []
+
+    stat_iter = 0
+    counter = 0
+
+    # статистика доступна для любого аккаунта
+
+    stat_info = soup.find_all('ul', {'class': ['application-box-layout']})
+    for st in stat_info:
+        children = st.findChildren('li')
+        for i in range(len(children)):
+
+            if counter == 4:        # h-index повторяется, пропускаем его
+                pass
+            else:
+                    try:
+                        tmp = children[i].find('div', {'class': [
+                            'nova-legacy-e-text nova-legacy-e-text--size-xxxl nova-legacy-e-text--family-display nova-legacy-e-text--spacing-none nova-legacy-e-text--color-inherit']}).text
+
+                        if stat_iter == 6:      # поправить позже
+                            break
+
+                        # print(tmp)
+                        stat.append(tmp)
+                        stat_iter += 1
+
+                    # скипнуть лишнее
+                    except AttributeError:
+                        pass
+
+            counter += 1
+
     pass

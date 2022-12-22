@@ -6,3 +6,4 @@ Scripts
 geckodriver.exe
 geckodriver.log
 pyvenv.cfg
+config.json
