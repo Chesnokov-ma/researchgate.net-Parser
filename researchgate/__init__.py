@@ -11,8 +11,8 @@ class ResearchGateWebScraper:
 
     # импорт методов класса
     from .institution_members import get_institution_members
-    from .profile import get_profile
-    from .private import _page_404
+    from .profile import get_profile_info
+    from .private import _research_gate_page_404
 
     # удлось ли подключиться (доступен ли сайт)
     __is_connected = False
@@ -26,7 +26,8 @@ class ResearchGateWebScraper:
                  options: str = None,
                  login: str = None,
                  password: str = None,
-                 cookie: dict = None):
+                 cookie: dict = None,
+                 ignore_authorization: bool = False):
 
         """Авторизоваться на сайте и создать selenium.webdriver, войти на www.researchgate.net."""
 
@@ -43,9 +44,10 @@ class ResearchGateWebScraper:
                 makedirs(f'{self._data_dir_path}/{fdir}')
 
         final_options = None
-        if type(options) != Options:
-            final_options = Options()
-            final_options.add_argument(options)
+        if options:
+            if type(options) != Options:
+                final_options = Options()
+                final_options.add_argument(options)
 
         # Создать экземпляр драйвера webdriver
         try:
@@ -55,45 +57,61 @@ class ResearchGateWebScraper:
         except TypeError:
             self._driver = webdriver.Firefox(options=options)
 
-        # Первая попытка аунтификация на сайте, использование куки
-        if cookie:
-            self._driver.add_cookie(cookie)
+        # не авторизовываться
+        if not ignore_authorization:
+            # Первая попытка авторизации на сайте, использование куки
+            if cookie:
+                # добавить куки к драйверу
+                self._driver.add_cookie(cookie)
 
         # Сайти на сайт
         try:
             self._driver.get('https://www.researchgate.net')
         except WebDriverException:
+            # если не доступен
             raise PageNotFoundException
 
         self._is_connected = True
 
-        # Если перекидывет на страницу с "войти или зарегистрироваться"
-        # то авторизация по сохраненным паролям и куки не прошла
-        if not self._driver.find_element(By.CLASS_NAME, 'index-header__log-in') and \
-                self._driver.find_element(By.CLASS_NAME, 'index-header__sign-up gtm-new-index-page-join-btn-atf'):
+        # не авторизовываться
+        if not ignore_authorization:
 
-            self._is_authorized = True
+            # Если перекидывет на страницу с "войти или зарегистрироваться"
+            # то авторизация по сохраненным паролям и куки не прошла
+            if not self._driver.find_element(By.CLASS_NAME, 'index-header__log-in') and \
+                    self._driver.find_element(By.CLASS_NAME, 'index-header__sign-up gtm-new-index-page-join-btn-atf'):
+
+                self._is_authorized = True
+
+            else:
+                # Авторизация через страницу "войти" с введенными логином и паролем
+                self._driver.get('https://www.researchgate.net/login')
+
+                # Ввести логин и пароль в форму, нажать на кнопку "войти" (это единственная <button> на странице)
+                self._driver.find_element(By.ID, 'input-login').send_keys(login)
+                self._driver.find_element(By.ID, 'input-password').send_keys(password)
+                self._driver.find_element(By.CSS_SELECTOR, 'button').click()
+
+                # Авторизаццция не прошла (адрес все еще https://www.researchgate.net/login)
+                if self._driver.current_url == 'https://www.researchgate.net/login':
+                    # raise AuthorizationFailedException
+
+                    print('Authorization failed. Using unauthorized mode.')
+                    self._is_authorized = False
+
+                # Авторизация прошла успешно
+                else:
+                    print('Authorization succeed')
+                    self._is_authorized = True
 
         else:
-            # Авторизация через страницу "войти" с введенными логином и паролем
-            self._driver.get('https://www.researchgate.net/login')
+            print('Authorization ignored. Using unauthorized mode.')
 
-            # Ввести логин и пароль в форму, нажать на кнопку "войти" (это единственная <button> на странице)
-            self._driver.find_element(By.ID, 'input-login').send_keys(login)
-            self._driver.find_element(By.ID, 'input-password').send_keys(password)
-            self._driver.find_element(By.CSS_SELECTOR, 'button').click()
+    def connect(self):
+        pass
 
-            # Авторизаццция не прошла (адрес все еще https://www.researchgate.net/login)
-            if self._driver.current_url == 'https://www.researchgate.net/login':
-                # raise AuthorizationFailedException
-
-                print('Authorization failed. Using unauthorized mode.')
-                self._is_authorized = False
-
-            # Авторизация прошла успешно
-            else:
-                print('Authorization succeed')
-                self._is_authorized = True
+    def disconnect(self):
+        pass
 
     @property
     def is_connected(self):
