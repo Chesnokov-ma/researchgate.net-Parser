@@ -84,4 +84,4 @@ def get_institution_members(self,
     with open(f'{self._data_dir_path}/members/{institution.replace("-", "_")}_{start_page}-{stop_page}_'
               f'{"" if not light_search else "light"}.json', 'w', encoding='utf-8') as js_out:
         json.dump(institution_members, js_out, ensure_ascii=False)
-    print(f'Data for {institution.replace("-", "_")} collected.')
+    print(f'[INSTITUTION]: Data for {institution.replace("-", "_")} collected.')
