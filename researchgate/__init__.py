@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from .exceptions import *
 from os import path, makedirs
+import warnings
 
 
 class ResearchGateWebScraper:
@@ -25,6 +26,7 @@ class ResearchGateWebScraper:
                  executable_path: str = None,
                  options: str = None,
                  login: str = None,
+                 my_profile: str = None,
                  password: str = None,
                  cookie: dict = None,
                  ignore_authorization: bool = False):
@@ -107,10 +109,16 @@ class ResearchGateWebScraper:
         else:
             print('Authorization ignored. Using unauthorized mode.')
 
+        if self._is_authorized:
+            self._my_profile = my_profile
+
     def connect(self):
         pass
 
     def disconnect(self):
+        # if not self._is_authorized:
+        #     warnings.warn('Unauthorized already')
+        #     return
         pass
 
     @property

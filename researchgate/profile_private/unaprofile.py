@@ -5,13 +5,16 @@ def __get_unaprofile(self) -> dict:
     """Парсинг профиля в неавторизованном моде"""
 
     un_profile = {'base_info': {},
-                  'stat': {},
-                  'publications': {}}
+                  'publications': {},
+                  'stat': {}}
 
     source_data = self._driver.page_source
     soup = bs4(source_data, "html.parser")
 
-    name = soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-xl nova-legacy-e-text--family-display nova-legacy-e-text--spacing-xxs nova-legacy-e-text--color-inherit fn']}).text
+    try:
+        name = soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-xl nova-legacy-e-text--family-display nova-legacy-e-text--spacing-xxs nova-legacy-e-text--color-inherit fn']}).text
+    except AttributeError:
+        name = soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-xl nova-legacy-e-text--family-display nova-legacy-e-text--spacing-xxs nova-legacy-e-text--color-inherit']}).text
 
     try:
         institution = soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-l nova-legacy-e-text--family-display nova-legacy-e-text--spacing-none nova-legacy-e-text--color-inherit nova-legacy-v-institution-item__title']}).text
@@ -95,14 +98,15 @@ def __get_unaprofile(self) -> dict:
 
         publication_date = containter_soup.find('div', {'class': ['nova-legacy-v-publication-item__meta-right']}).text
 
-        try:
-            description_not_full = containter_soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-m nova-legacy-e-text--family-sans-serif nova-legacy-e-text--spacing-none nova-legacy-e-text--color-inherit nova-legacy-v-publication-item__description']}).text
-        except AttributeError:
-            description_not_full = ''
+        # try:
+        #     description_not_full = containter_soup.find('div', {'class': ['nova-legacy-e-text nova-legacy-e-text--size-m nova-legacy-e-text--family-sans-serif nova-legacy-e-text--spacing-none nova-legacy-e-text--color-inherit nova-legacy-v-publication-item__description']}).text
+        # except AttributeError:
+        #     description_not_full = ''
 
         temp_dict = {'title': title, 'publication_type': publication_type, 'available': available,
-                     'publication_date': publication_date, 'description_not_full': description_not_full,
-                     'publication_link': publication_link}
+                     'publication_date': publication_date, 'publication_link': publication_link}
+
+        # 'publication_date': publication_date,
 
         publications.append(temp_dict)
 

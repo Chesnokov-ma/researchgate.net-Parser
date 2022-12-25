@@ -2,11 +2,12 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 import json
 
-from .exceptions import PageNotFoundException
+from .exceptions import *
 
 
 def get_institution_members(self,
-                            institution: str,
+                            institution: str = None,
+                            p_url: str = None,
                             start_page: int = 1,
                             stop_page: int = None,
                             light_search: bool = False) -> None:
@@ -14,11 +15,19 @@ def get_institution_members(self,
     """Получить информацио о ученных из института. Для light_search == True
     лучше использовать unauthorized mode."""
 
-    institution = institution.replace(' ', '-')
-    current_page = start_page
+    if not institution and not p_url:
+        raise LinkNotProvidedException
 
-    # Сначала проверить, существует ли такой институт
-    self._driver.get(f'https://www.researchgate.net/institution/{institution}/members/{current_page}')
+    if institution:
+
+        institution = institution.replace(' ', '-')
+        current_page = start_page
+
+        # Сначала проверить, существует ли такой институт
+        self._driver.get(f'https://www.researchgate.net/institution/{institution}/members/{current_page}')
+
+    if not institution:
+        self._driver.get(p_url)
 
     if self._research_gate_page_404():
         raise PageNotFoundException(self._driver.current_url)  # если нет, завершить - выкинуть исключение
