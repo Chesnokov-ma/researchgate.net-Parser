@@ -1,4 +1,7 @@
 from bs4 import BeautifulSoup as bs4
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+import time
 
 
 def __get_apublication(self):
@@ -53,6 +56,31 @@ def __get_apublication(self):
                 DOI = row[key]
                 break
 
+    # авторы
+    authors = []
+
+    try:
+        authors_button = None
+
+        # не находит по xpath
+        # authors_buttons = self._driver.find_element(By.XPATH, '//*[@id="rgw4_63d3a47ee440e"]/div/div[1]/div[1]/div[1]/div[1]/ul/li[4]/button')
+        buttons = self._driver.find_elements(By.TAG_NAME, 'button')
+        for webelement in buttons:
+            if 'Show all' in webelement.text:
+                authors_button = webelement
+                break
+
+        if authors_button:
+            authors_button.click()
+            time.sleep(1.5)
+
+            # парсинг нового окна
+
+    except NoSuchElementException:
+
+        # парсинг элементов на основном окне
+
+        pass
 
     # print(name)
     # print(abstract)
@@ -65,7 +93,7 @@ def __get_apublication(self):
     return {'name': name,
             'abstract': abstract.replace('\u200b', ''),
             'DOI': DOI,
-            'authors': [],
+            'authors': authors,
             'type': type,
             'available': available,
             'download link': link,

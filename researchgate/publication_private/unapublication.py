@@ -1,7 +1,18 @@
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from bs4 import BeautifulSoup as bs4
-
+import time
 
 def __get_unapublication(self):
+
+    # раскрываем всех авторов
+    try:
+        authors_button = self._driver.find_element(By.XPATH, '//span[contains(@class, "js-show-more-authors")]')
+        authors_button.click()
+        time.sleep(1.5)     # ждем пока скрипт выполнится
+    except NoSuchElementException:
+        pass
+
     source_data = self._driver.page_source
     soup = bs4(source_data, "html.parser")
 
@@ -56,9 +67,6 @@ def __get_unapublication(self):
                 DOI = row[key]
                 break
 
-    # TODO: раскрываем всех авторов
-    # button = self._driver.find_element(By.CLASS_NAME, 'nova-legacy-l-flex__item nova-legacy-l-flex nova-legacy-l-flex--gutter-m nova-legacy-l-flex--direction-row@s-up nova-legacy-l-flex--align-items-stretch@s-up nova-legacy-l-flex--justify-content-flex-start@s-up nova-legacy-l-flex--wrap-nowrap@s-up research-detail-author-list__list')
-
     # все авторы
 
     authors = str(soup.find_all('div', {'class': ['nova-legacy-l-flex__item nova-legacy-l-flex nova-legacy-l-flex--gutter-m nova-legacy-l-flex--direction-column@s-up nova-legacy-l-flex--direction-row@m-up nova-legacy-l-flex--align-items-flex-start@s-up nova-legacy-l-flex--align-items-center@m-up nova-legacy-l-flex--justify-content-flex-start@s-up nova-legacy-l-flex--wrap-wrap@s-up research-detail-author-list__list js-authors-list']})[0])
@@ -94,7 +102,7 @@ def __get_unapublication(self):
     # print(read)
     # print(metadata_list)
     # print(DOI)
-    # print(authors_list)
+    print(authors_list)
 
     return {'name': name,
             'abstract': abstract,

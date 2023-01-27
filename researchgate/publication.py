@@ -18,8 +18,6 @@ def get_publication_info(self,
     if not research:
         self._driver.get(r_url)
 
-    research_dict = {}
-
     if not self._is_authorized:
         research_dict = __get_unapublication(self)
     else:

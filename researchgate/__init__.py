@@ -16,6 +16,8 @@ class ResearchGateWebScraper:
     from .publication import get_publication_info
     from .private import _research_gate_page_404
 
+    from .test import authors_button_test
+
     # удлось ли подключиться (доступен ли сайт)
     __is_connected = False
     # удалось ли авторизоваться
@@ -113,14 +115,20 @@ class ResearchGateWebScraper:
         if self._is_authorized:
             self._my_profile = my_profile
 
-    def connect(self):
+    def authorize(self):
         pass
 
+    def unauthorize(self):
+        if not self._is_authorized:
+            warnings.warn('Unauthorized already')
+            return
+        else:
+            pass
+
     def disconnect(self):
-        # if not self._is_authorized:
-        #     warnings.warn('Unauthorized already')
-        #     return
-        pass
+        self._is_authorized = False
+        self._is_connected = False
+        self._driver.close()
 
     @property
     def is_connected(self):
