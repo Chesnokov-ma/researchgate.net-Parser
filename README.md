@@ -23,7 +23,7 @@ sergate_ws.get_publication_info('https://www.researchgate.net/publication/317614
 # sergate_ws.get_publication_info('317614509_Engineering_the_breaking_of_time-reversal_symmetry_in_gate-tunable_hybrid_ferromagnettopological_insulator_heterostructures')
 ```
 
-# conf.txt
+# conf.json
 ```json
 {
   "EXE_PATH" : "/geckodriver.exe",
