@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup as bs4
 from ..exceptions import *
 import time
 
+
 def __get_aprofile(self, pages: tuple) -> dict:
     """Парсинг профиля в авторизованном моде"""
 

@@ -37,13 +37,11 @@ def get_profile_info(self,
     profile_dict = {profile: {}}  # словарь бля хранения данных о профиле
 
     # теги для двух версий отличаются
-    # TODO: выходной файл тоже
+    # TODO: выходной файл тоже (+)
     if not self._is_authorized:
         profile_dict[profile] = __get_unaprofile(self)
     else:
         profile_dict[profile] = __get_aprofile(self, ('/research', '/stats'))
-
-    # print(profile_dict)
 
     # Запись в json-файл
 

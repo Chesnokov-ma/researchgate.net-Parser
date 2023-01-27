@@ -13,6 +13,7 @@ class ResearchGateWebScraper:
     # импорт методов класса
     from .institution_members import get_institution_members
     from .profile import get_profile_info
+    from .publication import get_publication_info
     from .private import _research_gate_page_404
 
     # удлось ли подключиться (доступен ли сайт)
@@ -20,7 +21,7 @@ class ResearchGateWebScraper:
     # удалось ли авторизоваться
     _is_authorized = False
     # директории для выгрузки
-    __nested = {'data': ('members', 'profile')}
+    __nested = {'data': ('members', 'profile', 'research')}
 
     def __init__(self,
                  executable_path: str = None,
