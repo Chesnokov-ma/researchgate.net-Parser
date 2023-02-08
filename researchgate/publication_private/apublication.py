@@ -58,6 +58,7 @@ def __get_apublication(self):
 
     # авторы
     authors = []
+    authors_list = []
 
     try:
         authors_button = None
@@ -73,14 +74,42 @@ def __get_apublication(self):
         if authors_button:
             authors_button.click()
             time.sleep(1.5)
+        else:
+            raise NoSuchElementException
 
-            # парсинг нового окна
+        # парсинг нового окна
+        soup = bs4(self._driver.page_source, "html.parser")
+        authors = str(soup.find('div', {'class': ['research-detail-authors-modal__list']}))
+        authors_soup = bs4(authors, "html.parser")
+
+        for authors_container in authors_soup.find_all('a', {'class': ['nova-legacy-e-link nova-legacy-e-link--color-inherit nova-legacy-e-link--theme-bare']}):
+            authors_list.append([authors_container.text, authors_container.get('href')])
 
     except NoSuchElementException:
 
         # парсинг элементов на основном окне
+        authors = str(soup.find('ul', {'class': [
+            'nova-legacy-e-list nova-legacy-e-list--size-m nova-legacy-e-list--type-inline nova-legacy-e-list--spacing-xl']}))
+        authors_soup = bs4(authors, "html.parser")
 
-        pass
+        # внутри блоков с авторами лежат еще ссылки, которые не визуально не видны и не нажимаемы
+        # нужно от них исбавиться
+        for authors_container in authors_soup.find_all('a'):
+            authors_list.append([authors_container.text, authors_container.get('href')])
+
+    temp = []
+    for panel in authors_list:
+        if panel[0] != ' ':
+            if 'profile/' in panel[1]:
+                temp.append({panel[0]: 'https://www.researchgate.net/' + panel[1]})
+            elif 'scientific-contributions/' in panel[1]:
+                temp.append({panel[0]: ''})
+
+    # встречаются и дубликаты
+    authors_list = []
+    for elem in temp:
+        if elem not in authors_list:
+            authors_list.append(elem)
 
     # print(name)
     # print(abstract)
@@ -93,7 +122,7 @@ def __get_apublication(self):
     return {'name': name,
             'abstract': abstract.replace('\u200b', ''),
             'DOI': DOI,
-            'authors': authors,
+            'authors': authors_list,
             'type': type,
             'available': available,
             'download link': link,
